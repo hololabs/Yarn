@@ -113,7 +113,8 @@ var App = function(name, version)
 		// drag node holder around
 		(function()
 		{
-			var dragging = false;
+			var draggingLeft = false;
+			var draggingRight = false;
 			var offset = { x: 0, y: 0 };
 			var MarqueeOn = false;
 			var MarqueeSelection = [];
@@ -122,8 +123,17 @@ var App = function(name, version)
 
 			$(".nodes").on("mousedown", function(e)
 			{
+				
 				$("#marquee").css({x:0, y:0, width:0, height:0});
-				dragging = true;
+				
+				if ( e.buttons & 4 ){
+					draggingRight = true;
+				} 
+				if ( e.buttons & 1 ){
+					draggingLeft = true;					
+				}
+				
+				
 				offset.x = e.pageX;
 				offset.y = e.pageY;
 				MarqueeSelection = [];
@@ -141,7 +151,15 @@ var App = function(name, version)
 			$(".nodes").on("mousemove", function(e)
 			{
 				
-				if (dragging)
+				if ( draggingRight ){
+					self.transformOrigin[0] += e.pageX - offset.x;
+					self.transformOrigin[1] +=e.pageY - offset.y
+					offset.x = e.pageX
+					offset.y = e.pageY
+					self.translate()
+				}
+				
+				if (draggingLeft)
 				{
 					//if(e.ctrlKey)
 					if (e.altKey)
@@ -259,7 +277,8 @@ var App = function(name, version)
 
 			$(".nodes").on("mouseup", function(e)
 			{
-				dragging = false;
+				draggingLeft = false;
+				draggingRight = false;
 
 				if(MarqueeOn && MarqueeSelection.length == 0)
 				{
