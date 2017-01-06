@@ -3,6 +3,9 @@ var App = function(name, version)
 	var self = this;
 
 	// self
+	this.fitPadding = 20
+	this.fitTopMargin = 80
+	
 	this.instance = this;
 	this.name = ko.observable(name);
 	this.version = ko.observable(version);
@@ -37,6 +40,66 @@ var App = function(name, version)
 		this.fs = require('fs');
 	}
 
+	this.fit = function(){
+		
+		//find out the bounds of the node area
+		var left = Number.POSITIVE_INFINITY
+		var right = Number.NEGATIVE_INFINITY
+		var top = Number.POSITIVE_INFINITY
+		var bottom = Number.NEGATIVE_INFINITY
+		
+		//~ self.cachedScale = 1
+		//~ self.translate(0)
+		
+		$(".node").each(function(){
+			var pos = $(this).position()
+			pos.left /= self.cachedScale
+			pos.top /= self.cachedScale
+			
+			
+			pos.right = pos.left + ($(this).width()/self.cachedScale)
+			pos.bottom = pos.top + ($(this).height()/self.cachedScale)
+			
+			// padding options
+			pos.top -= self.fitTopMargin			
+			pos.left -= self.fitPadding
+			pos.right += self.fitPadding			
+			pos.bottom += self.fitPadding
+			
+			left = pos.left < left ? pos.left : left
+			right = pos.right > right ? pos.right : right
+			top = pos.top < top ? pos.top : top
+			bottom = pos.bottom > bottom ? pos.bottom : bottom
+		})			
+				
+
+		var windowWidth = $(".nodes").width()
+		var windowHeight = $(".nodes").height()
+		
+		//Determine scaling			
+		var width = right - left
+		var height = bottom - top			
+		var widthScale = windowWidth / width
+		var heightScale = windowHeight / height
+		self.cachedScale = Math.min(1,widthScale,heightScale)
+		
+		//centering
+		if (self.cachedScale == widthScale ){
+			top -= windowHeight/2
+		} else  if ( self.cachedScale == heightScale ){
+			left -= windowWidth/2
+		}
+		
+		//Perform final translation
+		self.transformOrigin[0] = -left * self.cachedScale
+		self.transformOrigin[1] = -top * self.cachedScale
+		self.translate(200);
+		
+		//~ console.log(self.cachedScale)
+		//self.cachedScale = Math.min(1,widthScale,heightScale);
+		
+		
+	}
 	this.run = function()
 	{
 		//TODO(Al):
@@ -110,6 +173,11 @@ var App = function(name, version)
 		// updateArrows
 		setInterval(function() { self.updateArrows(); }, 16);
 
+		
+		
+	
+			
+		
 		// drag node holder around
 		(function()
 		{
@@ -292,6 +360,19 @@ var App = function(name, version)
 
 			});
 		})();
+		
+		//Fit button
+		(function(){
+			$("#fit").click(function(e){
+				self.fit()
+			})
+			$(document).on("keydown", function(e){
+				if ( e.ctrlKey && e.keyCode == 74 ){
+					self.fit()
+				}
+			})
+		})()
+
 
 		// search field
 		self.$searchField.on('input', self.updateSearch);
@@ -349,6 +430,7 @@ var App = function(name, version)
 			return !isAllowedEl; 
 		}); 
 
+		// Ctrl + Commands
 		$(document).on('keydown', function(e){
 			//global ctrl+z
 			if((e.metaKey || e.ctrlKey) && !self.editing())
@@ -364,6 +446,8 @@ var App = function(name, version)
 			}
 		});
 
+		
+		//Scroll 
 		$(document).on('keydown', function(e) {
 			if (self.editing() || self.$searchField.is(':focus')) return;
 
