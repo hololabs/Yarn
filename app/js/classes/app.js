@@ -259,7 +259,6 @@ var App = function(name, version)
 
 			$(".nodes").on("mouseup", function(e)
 			{
-				console.log("finished dragging");
 				dragging = false;
 
 				if(MarqueeOn && MarqueeSelection.length == 0)
@@ -315,17 +314,19 @@ var App = function(name, version)
 					$(e.target).parents('.nodes').length
 				);
 
-			if( e.button == 2 && isAllowedEl )
-			{
-				var x = self.transformOrigin[0] * -1 / self.cachedScale,
-					y = self.transformOrigin[1] * -1 / self.cachedScale;
+			// -- Right click to create a new node -- //
+			//~ if( e.button == 2 && isAllowedEl )
+			//~ {
+				//~ var x = self.transformOrigin[0] * -1 / self.cachedScale,
+					//~ y = self.transformOrigin[1] * -1 / self.cachedScale;
 
-				x += event.pageX / self.cachedScale;
-				y += event.pageY / self.cachedScale;
+				//~ x += event.pageX / self.cachedScale;
+				//~ y += event.pageY / self.cachedScale;
 
-				self.newNodeAt(x, y); 
-			} 
+				//~ self.newNodeAt(x, y); 	-- create new node on right click
+			//~ } 
 
+			// Prevent default context menu
 			return !isAllowedEl; 
 		}); 
 
